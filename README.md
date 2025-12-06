@@ -1,4 +1,4 @@
-# Weather Data Pipeline with Airflow & AI Agents
+# ⛅Weather Data Pipeline with Airflow & AI Agents
 
 Docker 기반의 Airflow 환경을 직접 구축하여 영국 날씨 데이터를 수집하는 ELT 파이프라인이며, Google Gemini API 기반의 AI Agent를 활용한 자동 PR 생성 및 자동 코드 리뷰 시스템을 포함합니다.
 
