@@ -6,9 +6,9 @@ services:
     container_name: postgres
     environment:
       # 컨테이너 생성 시 최고 관리자 계정 이름과 패스워드 지정
-      POSTGRES_USER: ${POSTGRES_USER}         
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} 
-      POSTGRES_DB: ${POSTGRES_DB}             
+      POSTGRES_USER: ${POSTGRES_USER:-admin}         
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-0000} 
+      POSTGRES_DB: ${POSTGRES_DB:-airflow}             
     ports:
       - "5432:5432"
     # 데이터 영구 저장을 위한 volumn 연결
@@ -16,7 +16,7 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,8 +30,8 @@ services:
     command: minio server /data --console-address ":9001" --address ":9000"
     environment:
       # MinIO 관리자 ID/PW (S3 Access Key / Secret Key 역할)
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-00000000}
     ports:
       - "9000:9000" # API 포트 (Airflow 등 프로그램이 접속)
       - "9001:9001" # 웹 콘솔 포트 (브라우저로 접속)
