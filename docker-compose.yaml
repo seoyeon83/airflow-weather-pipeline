@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      # 컨테이너 생성 시 최고 관리자 계정 이름과 패스워드 지정
+      POSTGRES_USER: ${POSTGRES_USER:-admin}         
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-0000} 
+      POSTGRES_DB: ${POSTGRES_DB:-airflow}             
+    ports:
+      - "5432:5432"
+    # 데이터 영구 저장을 위한 volumn 연결
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - data-network
+
+  minio:
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
+    container_name: minio
+    # 서버 실행 명령: 데이터 디렉토리 지정 및 콘솔 포트 고정
+    command: minio server /data --console-address ":9001" --address ":9000"
+    environment:
+      # MinIO 관리자 ID/PW (S3 Access Key / Secret Key 역할)
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-00000000}
+    ports:
+      - "9000:9000" # API 포트 (Airflow 등 프로그램이 접속)
+      - "9001:9001" # 웹 콘솔 포트 (브라우저로 접속)
+    volumes:
+      - ./minio_data:/data # 데이터 영구 저장
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - data-network
+
+
+networks:
+  data-network:
+    driver: bridge
