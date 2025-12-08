@@ -1,11 +1,12 @@
-## 📌 Issue Number
-- closed #
+## 💡 개요
 
-## 🪐 작업 내용
+* Issue Number: #
+
+## 🪐 주요 변경 사항
 - 
 
-## ✅ PR 상세 내용
+## ✅ 상세 내용
 - 
 
-## 📚 Reference
+## 🔔 참고 사항
 - 
