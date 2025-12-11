@@ -10,9 +10,9 @@ x-airflow-common:
     # 1. Executor 설정 (CeleryExecutor 선택)
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     # 메타데이터 저장소
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-0000}@postgres/${POSTGRES_DB:-airflow}
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}
     # 워커가 작업 결과를 저장할 저장소
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-0000}@postgres/${POSTGRES_DB:-airflow}
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}
     # 스케줄러와 워커 사이의 broker 역할을 할 저장소
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     
@@ -30,7 +30,7 @@ x-airflow-common:
     
     # 3. MinIO 연동 자동 설정 (S3 Connection 미리 주입)
     # 형식: aws://<login>:<password>@?extra__aws__endpoint_url=<endpoint>
-    AIRFLOW_CONN_MINIO_S3: "aws://${MINIO_ROOT_USER:-admin}:${MINIO_ROOT_PASSWORD:-00000000}@?extra__aws__endpoint_url=http://minio:9000"
+    AIRFLOW_CONN_MINIO_S3: "aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin}@?extra__aws__endpoint_url=http://minio:9000"
 
   volumes:
     - ./dags:/opt/airflow/dags
@@ -55,8 +55,8 @@ services:
     container_name: postgres
     environment:
       # 컨테이너 생성 시 최고 관리자 계정 이름과 패스워드 지정
-      POSTGRES_USER: ${POSTGRES_USER:-admin}         
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-0000} 
+      POSTGRES_USER: ${POSTGRES_USER:-airflow}         
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow} 
       POSTGRES_DB: ${POSTGRES_DB:-airflow}             
     ports:
       - "5432:5432"
@@ -65,7 +65,7 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-airflow}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -94,8 +94,8 @@ services:
     command: minio server /data --console-address ":9001" --address ":9000"
     environment:
       # MinIO 관리자 ID/PW (S3 Access Key / Secret Key 역할)
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-00000000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     ports:
       - "9000:9000" # API 포트 (Airflow 등 프로그램이 접속)
       - "9001:9001" # 웹 콘솔 포트 (브라우저로 접속)
