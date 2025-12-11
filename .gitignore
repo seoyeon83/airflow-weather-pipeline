@@ -1,3 +1,13 @@
+# 환경 변수
+.env
+
+# Docker 마운트 데이터
 minio_data/
 postgres_data/
-.env
+
+# Airflow 실행 로그
+logs/
+
+# Python 임시 파일
+__pycache__/
+*.pyc
