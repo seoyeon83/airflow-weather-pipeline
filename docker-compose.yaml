@@ -17,8 +17,8 @@ x-airflow-common:
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     
     # 2. 기본 설정
-    # 실행 시 자동 생성되거나 임의의 문자열 필요 (테스트용 공란 가능)
-    AIRFLOW__CORE__FERNET_KEY: '' 
+    # 암호화 키 설정
+    AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY}
     # DAG 생성 시 기본 Pause 상태
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true' 
     # 예제 DAG 로드 안 함 (지저분해짐 방지)
