@@ -1,22 +1,39 @@
 # ⛅Global Weather Live: Real-time Data Pipeline & AI Agents
 
-> **Kafka & Spark Structured Streaming 기반의 대용량 기상 데이터 실시간 처리 및 AI 협업 파이프라인**
-
-Docker 기반의 Airflow 환경을 직접 구축하여 전 세계 30개 주요 도시의 기상 데이터를 수집하는 파이프라인이며, Google Gemini API 기반의 AI Agent를 활용한 자동 PR 생성 및 자동 코드 리뷰 시스템을 포함합니다.
+Docker 기반의 Airflow 환경을 직접 구축하여 전 세계 30개 주요 도시의 기상 데이터를 수집하는 프로젝트입니다. 안정적인 배치(Batch) 파이프라인을 먼저 구축하여 데이터 정합성을 확보한 뒤, Kafka & Spark를 도입하여 실시간(Real-time) 아키텍처로 고도화하는 과정을 담고 있습니다.
 
 ## 📖 프로젝트 개요 (Project Overview)
-이 프로젝트는 단순한 배치 처리를 넘어, 대용량 트래픽 상황을 가정한 실시간 데이터 엔지니어링 역량을 확보하기 위해 시작되었습니다. Kafka를 통해 급격한 트래픽 버스트를 안정적으로 처리하고, Spark Structured Streaming의 Two-Stream Architecture를 도입하여 '실시간 분석'과 '데이터 유실 방지'라는 두 마리 토끼를 모두 잡고자 합니다.
-
-또한, 1인 개발의 한계를 극복하기 위해 AI Agent **CodeRabbit**을 도입, 코드 리뷰까지 자동화된 협업 환경을 구축했습니다.
+이 프로젝트의 핵심은 **"데이터 파이프라인의 진화"**입니다. 처음부터 복잡한 기술을 도입하는 대신, 2단계의 로드맵을 통해 인프라의 안정성을 검증하고 기술적 타당성을 확보하며 시스템을 확장합니다.
+- Phase 1: Airflow와 Python을 활용한 ELT 배치 파이프라인 구축 (데이터 정합성 및 스키마 검증 집중)
+- Phase 2: Kafka와 Spark Structured Streaming 도입을 통한 실시간 아키텍처 전환 (Latency 최소화 및 트래픽 분산 집중)
 
 ### 🎯 주요 목표
-- Real-time Processing: Kafka와 Spark Structured Streaming을 활용해 데이터 생성부터 시각화까지의 지연 시간을 최소화 (Micro-batch)
-- Reliability & Replayability: 원본 데이터(Raw)를 Data Lake에 우선 적재하여, 로직 오류 발생 시 언제든 재처리(Replay) 가능한 아키텍처 구현
-- Scalability: 초당 수천 건의 메시지가 유입되어도 버틸 수 있는 내결함성(Fault Tolerance) 확보
+- Iterative Engineering: 배치 처리에서 스트리밍 처리로 넘어가는 기술적 마이그레이션 과정 경험
 - Docker 인프라 운영: 로컬 환경에서 컨테이너 기반의 데이터 플랫폼 직접 구성 및 운영
 - AI-Driven Workflow: LLM(CodeRabbit)을 활용한 자동 코드 리뷰 및 문서화로 코드 품질 유지
 
-## 🏗️ 아키텍처 (Architecture)
+Phase 2:
+- Real-time Processing: Kafka와 Spark Structured Streaming을 활용해 데이터 생성부터 시각화까지의 지연 시간을 최소화 (Micro-batch)
+- Reliability & Replayability: 원본 데이터(Raw)를 Data Lake에 우선 적재하여, 로직 오류 발생 시 언제든 재처리(Replay) 가능한 아키텍처 구현
+- Scalability: 초당 수천 건의 메시지가 유입되어도 버틸 수 있는 내결함성(Fault Tolerance) 확보
+
+## 📅 프로젝트 로드맵 (Roadmap)
+### 🌱 Phase 1: Robust Batch Pipeline (Current)
+> "안정적인 데이터 수집과 적재 환경 구축"
+- Tech: Airflow, Python(Pandas/..), MinIO, PostgreSQL
+- Architecture:
+  1. Airflow가 1시간 주기로 API 호출 및 데이터 유효성 검사
+  2. Raw Data를 **MinIO(Data Lake)**에 JSON 파일로 적재
+  3. MinIO에서 데이터를 읽어 정제 후 **PostgreSQL(DW)**에 적재
+
+### 🚀 Phase 2: Real-time Streaming Architecture (Planned)
+> "대용량 트래픽 처리와 실시간성 확보"
+- Tech: Kafka, Spark Structured Streaming, Docker Scaling
+- Architecture: Two-Stream Strategy 적용 (Data Lake 적재와 실시간 집계의 분리)
+  1. Ingestion: Kafka Producer가 비동기로 API 호출 후 토픽 전송
+  2. Processing: Spark가 Kafka 데이터를 읽어 DL(MinIO)과 DW(Postgres)로 이중 적재
+
+## 🏗️ 타깃 아키텍처 (Target Architecture - Phase 2)
 Two-Stream Strategy: Spark에서 데이터를 받아 [Data Lake 저장]과 [DW 실시간 집계]를 병렬로 처리합니다.
 
 ### 🔄 데이터 흐름 (Data Flow)
