@@ -60,7 +60,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-airflow}             
     ports:
       - "5432:5432"
-    # 데이터 영구 저장을 위한 volumn 연결
+    # 데이터 영구 저장을 위한 volume 연결
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: always
