@@ -6,11 +6,11 @@ CREATE SCHEMA IF NOT EXISTS mart;
 -- city table 생성
 CREATE TABLE IF NOT EXISTS mart.city (
     id SERIAL NOT NULL PRIMARY KEY,
-    openweather_city_id INTEGER,
-    name VARCHAR(100),
-    country CHAR(3),
-    latitude NUMERIC(10,7),
-    longitude NUMERIC(10,7),
+    openweather_city_id INTEGER NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    country CHAR(3) NOT NULL,
+    latitude NUMERIC(10,7) NOT NULL,
+    longitude NUMERIC(10,7) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
