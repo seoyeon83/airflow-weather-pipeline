@@ -32,6 +32,9 @@ x-airflow-common:
     AIRFLOW_CONN_MINIO_S3: "aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin}@?extra__aws__endpoint_url=http://minio:9000"
     AIRFLOW_CONN_POSTGRES: "postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}"
 
+    # 5. 환경변수 주입
+    OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
