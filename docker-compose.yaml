@@ -62,6 +62,7 @@ services:
       - "5432:5432"
     # 데이터 영구 저장을 위한 volume 연결
     volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
