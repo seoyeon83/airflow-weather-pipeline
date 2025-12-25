@@ -76,7 +76,7 @@ def fetch_current_weather(lat: float, lon: float) -> Dict[str, Any]:
     raise Exception(error_msg)
 
 
-def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str, execution_date: datetime) -> str:
+def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str, city_name:str, execution_date: datetime) -> str:
     """
     수집된 날씨 JSON 데이터를 MinIO의 지정된 경로에 업로드
 
@@ -91,16 +91,13 @@ def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str, execution_date: 
     """
     from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-    dt = datetime.fromtimestamp(data["dt"], tz=timezone.utc)
-    city = data.get("name", "unknown").replace(" ", "_").lower()
-
     partition = (
         f"year={execution_date.year}/"
         f"month={execution_date.month:02d}/"
         f"day={execution_date.day:02d}/"
         f"hour={execution_date.hour:02d}"
     )
-    filename = f"{data['dt']}_{city}.json"
+    filename = f"{data['dt']}_{city_name}.json"
     s3_key = f"source=openweathermap/type=current/{partition}/{filename}"
     
     logger.info(f"Attempting to upload raw data to s3://{bucket_name}/{s3_key}")
@@ -117,7 +114,7 @@ def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str, execution_date: 
     return s3_key
 
 
-def run_weather_ingestion_batch(cities: List[Dict[str, Any]], bucket_name: str) -> List[str]:
+def run_weather_ingestion_batch(cities: List[Dict[str, Any]], bucket_name: str, execution_date: datetime) -> List[str]:
     """
     도시 목록을 순회하며 날씨 데이터를 일괄 수집 및 적재
 
@@ -139,13 +136,13 @@ def run_weather_ingestion_batch(cities: List[Dict[str, Any]], bucket_name: str) 
             
             data["dw_city_id"] = city["id"]
 
-            key = upload_raw_to_minio(data, bucket_name)
+            key = upload_raw_to_minio(data, bucket_name, city["name"], execution_date)
             paths.append(key)
             success_count += 1
 
         except Exception as e:
             fail_count += 1
-            logger.warning(f"Failed to ingest weather for city '{city.get('name')}': {str(e)}")
+            logger.warning(f"Failed to ingest weather for city '{city['name']}': {str(e)}")
             continue
             
     logger.info(f"Batch ingestion finished. Success: {success_count}, Failure: {fail_count}")
