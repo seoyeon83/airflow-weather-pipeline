@@ -76,7 +76,7 @@ def fetch_current_weather(lat: float, lon: float) -> Dict[str, Any]:
     raise Exception(error_msg)
 
 
-def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str) -> str:
+def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str, execution_date: datetime) -> str:
     """
     수집된 날씨 JSON 데이터를 MinIO의 지정된 경로에 업로드
 
@@ -94,7 +94,12 @@ def upload_raw_to_minio(data: Dict[str, Any], bucket_name: str) -> str:
     dt = datetime.fromtimestamp(data["dt"], tz=timezone.utc)
     city = data.get("name", "unknown").replace(" ", "_").lower()
 
-    partition = f"year={dt.year}/month={dt.month:02d}/day={dt.day:02d}/hour={dt.hour:02d}"
+    partition = (
+        f"year={execution_date.year}/"
+        f"month={execution_date.month:02d}/"
+        f"day={execution_date.day:02d}/"
+        f"hour={execution_date.hour:02d}"
+    )
     filename = f"{data['dt']}_{city}.json"
     s3_key = f"source=openweathermap/type=current/{partition}/{filename}"
     
