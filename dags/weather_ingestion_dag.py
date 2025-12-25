@@ -1,12 +1,20 @@
-# fetch_and_upload_raw
+"""
+날씨 데이터 수집을 위한 DAG 모듈
+
+이 DAG는 DW에서 수집 대상 도시 목록을 가져온 후, 
+OpenWeatherMap API를 통해 데이터를 수집하여 MinIO 데이터 레이크에 적재함
+"""
+
 
 from datetime import datetime
-from common import ingestion
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+from common import ingestion
 
-S3_BUCKEY_NAME = "weather"
+
+S3_BUCKET_NAME = "weather"
 
 
 with DAG(
@@ -27,11 +35,9 @@ with DAG(
         python_callable=ingestion.run_weather_ingestion_batch,
         op_kwargs={
             "cities": "{{ ti.xcom_pull(task_ids='get_target_cities') }}",
-            "bucket_name": S3_BUCKEY_NAME
+            "bucket_name": S3_BUCKET_NAME,
+            "execution_date": "{{ logical_date }}"
         }
     )
 
-    (
-        get_target_cities
-        >> ingest_weather_to_minio
-    )
+    get_target_cities >> ingest_weather_to_minio
