@@ -66,7 +66,7 @@ def fetch_current_weather(lat: float, lon: float) -> Dict[str, Any]:
         f"lat={lat}&lon={lon}&appid={api_key}&units=metric"
     )
     
-    response = requests.get(api_url)
+    response = requests.get(api_url, timeout=30)
 
     if response.status_code == 200:
         return response.json()
