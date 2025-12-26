@@ -44,12 +44,12 @@ def load_parquet_to_dw(bucket_name: str, parquet_key: str):
     min_dt = df['dt'].min()
     max_dt = df['dt'].max()
 
-    delete_sql = f"""
+    delete_sql = """
         DELETE FROM mart.weather 
-        WHERE city_id IN {city_ids_str} 
-        AND dt BETWEEN '{min_dt}' AND '{max_dt}';
+        WHERE city_id = ANY(%s) 
+        AND dt BETWEEN %s AND %s;
     """
-    pg_hook.run(delete_sql)
+    pg_hook.run(delete_sql, parameters=(city_ids, min_dt, max_dt))
 
     logger.info(f"Deleted existing records for cities {city_ids_str} between {min_dt} and {max_dt}")
     logger.info("Inserting new records into mart.weather table")
