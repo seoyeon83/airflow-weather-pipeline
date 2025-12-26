@@ -29,8 +29,11 @@ x-airflow-common:
     AIRFLOW__WEBSERVER__WORKERS: 2
     
     # 4. Connection 주입
-    AIRFLOW_CONN_MINIO_S3: "aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin}@?extra__aws__endpoint_url=http://minio:9000"
-    AIRFLOW_CONN_POSTGRES: "postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}"
+    AIRFLOW_CONN_MINIO_S3: aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin}@/?endpoint_url=http%3A%2F%2Fminio%3A9000&region_name=us-east-1&force_path_style=true
+    AIRFLOW_CONN_POSTGRES: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}
+
+    # 5. 환경변수 주입
+    OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
 
   volumes:
     - ./dags:/opt/airflow/dags
