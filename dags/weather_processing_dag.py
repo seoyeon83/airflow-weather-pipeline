@@ -33,13 +33,11 @@ with DAG(
         op_kwargs={
             "bucket_name": S3_BUCKET_NAME,
             "partition_path": (
-                "source=openweathermap/type=current/"
                 "year={{ dag_run.conf['year'] }}/"
                 "month={{ dag_run.conf['month'] }}/"
                 "day={{ dag_run.conf['day'] }}/"
                 "hour={{ dag_run.conf['hour'] }}/"
-            ),
-            "execution_date": "{{ execution_date }}"
+            )
         }
     )
 

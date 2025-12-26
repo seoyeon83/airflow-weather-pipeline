@@ -8,9 +8,7 @@ MinIO에 저장된 개별 도시별 JSON 파일들을 읽어와서 데이터 평
 
 import json
 import logging
-import io
 from datetime import datetime
-from typing import Optional
 
 import pandas as pd
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
@@ -19,21 +17,21 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 logger = logging.getLogger("airflow.task")
 
 
-def transform_json_to_parquet(bucket_name:str, partition_path:str, execution_date:datetime) -> str:
+def transform_json_to_parquet(bucket_name:str, partition_path:str) -> str:
     """
     MinIO의 Raw 폴더에서 JSON 파일들을 읽어 단일 Parquet 파일로 변환 및 통합
 
     Args:
         bucket_name (str): MinIO 버킷 이름
         partition_path (str): 읽어올 JSON 파일들이 위치한 S3 prefix 경로
-        execution_date (datetime): 파티션 및 파일명 생성을 위한 기준 시각
 
     Returns:
         str: 생성된 Parquet 파일의 S3 Key (경로). 파일이 없을 경우 빈 문자열 반환
     """
     s3_hook = S3Hook(aws_conn_id="minio_s3")
     
-    keys = s3_hook.list_keys(bucket_name=bucket_name, prefix=partition_path)
+    
+    keys = s3_hook.list_keys(bucket_name=bucket_name, prefix=f"/source=openweathermap/type=current/{partition_path}")
     if not keys:
         logger.info(f"No files found in {partition_path}")
         return ""
@@ -74,13 +72,7 @@ def transform_json_to_parquet(bucket_name:str, partition_path:str, execution_dat
 
     df = pd.DataFrame(all_data)
     
-    partition = (
-        f"year={execution_date.year}/"
-        f"month={execution_date.month:02d}/"
-        f"day={execution_date.day:02d}/"
-        f"hour={execution_date.hour:02d}"
-    )
-    target_key = f"source=openweathermap/type=processed/{partition}/weather_batch.parquet"
+    target_key = f"source=openweathermap/type=processed/{partition_path}/weather_batch.parquet"
     
     parquet_buffer = df.to_parquet(index=False)
     s3_hook.load_bytes(
