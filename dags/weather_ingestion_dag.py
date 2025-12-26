@@ -10,6 +10,7 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 from common import ingestion
 
@@ -40,4 +41,15 @@ with DAG(
         }
     )
 
-    get_target_cities >> ingest_weather_to_minio
+    trigger_processing = TriggerDagRunOperator(
+        task_id='trigger_processing',
+        trigger_dag_id='weather_processing',
+        conf={
+            'year': '{{ execution_date.year }}',
+            'month': '{{ execution_date.month }}',
+            'day': '{{ execution_date.day }}',
+            'hour': '{{ execution_date.hour }}'
+        }
+    )
+
+    get_target_cities >> ingest_weather_to_minio >> trigger_processing
